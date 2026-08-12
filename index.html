@@ -1,43 +1,801 @@
 <!DOCTYPE html>
-<html>
+<html lang="th">
 <head>
-    <title>กำลังโหลด... กรุณารอสักครู่</title>
-    <!-- **สำคัญ:** เปลี่ยนลิงก์ข้างล่างนี้เป็นลิงก์ Debug ของ CodePen ของคุณจริงๆ -->
-    <meta http-equiv="refresh" content="2; url='https://cdpn.io/pen/debug/xbgQQmw?authentication_hash=XBAGRmGoGLer">
-    
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Our Special Galaxy ❤️</title>
     <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Sukhumvit Set', 'Prompt', 'Segoe UI', Tahoma, sans-serif;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
         body {
+            background: linear-gradient(135deg, #ffd1dc 0%, #fbaed2 50%, #ff80bf 100%);
+            min-height: 100vh;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
+            padding: 20px 15px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        #dark-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
             height: 100vh;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            color: #555;
-            background-color: #fefefe;
+            background: #000000;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 888;
+            transition: opacity 0.05s linear;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 24px;
+            padding: 24px 20px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 15px 35px rgba(230, 80, 140, 0.3);
             text-align: center;
-            margin: 0;
+            position: relative;
+            margin: auto 0;
+            animation: fadeIn 0.8s ease;
+            z-index: 10;
         }
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #ff4d8d;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px auto;
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+
+        .lock-icon { font-size: 50px; margin-bottom: 10px; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+        h2 { color: #d63384; font-size: 20px; margin-bottom: 15px; }
+        input[type="password"] {
+            width: 85%; padding: 12px 20px; border: 2px solid #ffccd5;
+            border-radius: 25px; outline: none; text-align: center;
+            font-size: 16px; margin-bottom: 15px; transition: all 0.3s;
         }
+        input[type="password"]:focus { border-color: #ff4d8d; box-shadow: 0 0 10px rgba(255, 77, 141, 0.3); }
+        button.btn-pink {
+            background: linear-gradient(45deg, #ff4d8d, #ff758c); color: white;
+            border: none; padding: 14px 28px; border-radius: 30px;
+            font-size: 15px; font-weight: bold; cursor: pointer;
+            box-shadow: 0 5px 15px rgba(255, 77, 141, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 5px; display: inline-block; position: relative; overflow: hidden;
+        }
+        button.btn-pink:active { transform: scale(0.96); }
+        .btn-progress-bar {
+            position: absolute; top: 0; left: 0; height: 100%; width: 0%;
+            background: rgba(0, 0, 0, 0.35); pointer-events: none; border-radius: 30px;
+        }
+        .hint { font-size: 12px; color: #888; margin-top: 10px; }
+
+        .puzzle-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); grid-gap: 4px;
+            width: 280px; height: 280px; margin: 15px auto;
+            border: 4px solid #fff; border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15); background: #ffe6ea;
+            touch-action: none;
+        }
+        .puzzle-tile {
+            width: 100%; height: 100%; background-size: 300% 300%;
+            background-repeat: no-repeat; cursor: grab; border-radius: 4px;
+        }
+        .puzzle-tile.dragging { opacity: 0.4; transform: scale(0.9); }
+        .puzzle-tile.drag-over { outline: 3px dashed #ff4d8d; }
+
+        #page-card { display: flex; flex-direction: column; width: 100%; align-items: center; }
+        .card-img-wrapper {
+            width: 100%; max-width: 320px; aspect-ratio: 1 / 1;
+            background: #fff0f5; border-radius: 18px; margin-bottom: 18px;
+            overflow: hidden; display: flex; justify-content: center;
+            align-items: center; box-shadow: 0 8px 20px rgba(230, 80, 140, 0.25);
+            flex-shrink: 0;
+        }
+        .card-img { width: 100%; height: 100%; object-fit: cover; }
+        .card-title { font-size: 22px; color: #d63384; margin-bottom: 12px; }
+        .card-message-box {
+            width: 100%; background: #fff0f5; padding: 16px;
+            border-radius: 14px; border-left: 4px solid #ff4d8d;
+            margin-bottom: 20px; text-align: left; font-size: 15px;
+            color: #444; line-height: 1.6;
+        }
+        .typing-cursor {
+            display: inline-block; width: 2px; height: 14px;
+            background-color: #ff4d8d; margin-left: 2px;
+            animation: blink 0.7s infinite; vertical-align: middle;
+        }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        #page-galaxy {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #010105; z-index: 999; opacity: 0; pointer-events: none;
+            transition: opacity 0.6s ease; touch-action: none;
+        }
+        #page-galaxy.active { opacity: 1; pointer-events: auto; }
+        #galaxy-canvas { width: 100%; height: 100%; display: block; }
+        .galaxy-header {
+            position: absolute; top: 35px; left: 0; width: 100%;
+            text-align: center; color: #fff; z-index: 1000; pointer-events: none;
+        }
+        .galaxy-header h1 {
+            font-size: 28px; font-weight: bold; color: #ffffff;
+            display: inline-block; position: relative; letter-spacing: 1px;
+            text-shadow: 0 0 12px rgba(255, 182, 193, 0.6);
+        }
+        .galaxy-header h1 span.sparkle { font-size: 18px; position: absolute; top: -5px; right: -22px; }
+        .galaxy-header p.sub-title { font-size: 14px; color: rgba(255, 255, 255, 0.85); margin-top: 4px; font-weight: 300; }
+        .btn-back-card {
+            position: absolute; top: 20px; left: 20px; z-index: 1002;
+            background: rgba(255, 255, 255, 0.12); backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.25);
+            color: #ffffff; padding: 8px 16px; border-radius: 20px;
+            font-size: 13px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        .photo-popup {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%) scale(0); width: 82%;
+            max-width: 320px; background: rgba(255, 255, 255, 0.95);
+            padding: 12px; border-radius: 20px;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.4), 0 10px 25px rgba(0,0,0,0.8);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.27);
+            z-index: 1001; text-align: center;
+        }
+        .photo-popup.active { transform: translate(-50%, -50%) scale(1); }
+        .photo-popup img { width: 100%; border-radius: 12px; max-height: 260px; object-fit: cover; }
+        .photo-popup p { font-size: 13px; color: #ff4d8d; margin-top: 8px; font-weight: bold; }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
-    <div>
-        <div class="spinner"></div>
-        <p>กำลังเตรียมความทรงจำ...<br>หากรอนานเกินไป กรุณา <a href="https://cdpn.io/pen/debug/xbgQQmw?authentication_hash=XBAGRmGoGLer">คลิกที่นี่</a></p>
+
+    <div id="dark-overlay"></div>
+
+    <div class="container">
+        <div id="page-lock">
+            <div class="lock-icon">🔒</div>
+            <h2>วันนี้วันอะไรเอ่ย ? ❤️</h2>
+            <input type="password" id="passcode" placeholder="ใส่รหัสผ่านที่นี่...">
+            <br>
+            <button class="btn-pink" onclick="checkPassword()">ปลดล็อก</button>
+            <p class="hint">คำใบ้: วันที่สำคัญที่สุด</p>
+        </div>
+
+        <div id="page-puzzle" class="hidden">
+            <h2>ลากชิ้นส่วนมาสลับตำแหน่งกันนะ 💕</h2>
+            <p style="font-size: 12px; color: #666;">(กดค้างแล้วลากจิ๊กซอว์ไปวางทับชิ้นที่ต้องการ)</p>
+            <div class="puzzle-grid" id="puzzle-grid"></div>
+        </div>
+
+        <div id="page-card" class="hidden">
+            <div class="card-img-wrapper">
+                <img id="card-main-img" src="" alt="Our Memory" class="card-img">
+            </div>
+            <h3 class="card-title">ถึงเพื่อนที่แสนดี 💖</h3>
+            
+            <div class="card-message-box">
+                <span id="typed-text"></span><span class="typing-cursor"></span>
+            </div>
+
+            <button class="btn-pink" id="btn-hold-galaxy">
+                <span style="position: relative; z-index: 2;">กดค้างไว้เพื่อวาร์ป ✨</span>
+                <div class="btn-progress-bar" id="btn-progress"></div>
+            </button>
+        </div>
     </div>
+
+    <div id="page-galaxy">
+        <button class="btn-back-card" onclick="closeGalaxy()">❮ กลับหน้าการ์ด</button>
+
+        <div class="galaxy-header">
+            <h1>Galaxy<span class="sparkle">✨</span></h1>
+            <p class="sub-title">แปลว่า 🪐<br>ความทรงจำที่ไม่มีวันสิ้นสุด</p>
+        </div>
+        
+        <canvas id="galaxy-canvas"></canvas>
+
+        <div class="photo-popup" id="photo-popup">
+            <img id="popup-img" src="" alt="Memory">
+            <p id="popup-text">อยู่ในใจเสมอไม่เคยเปลี่ยนนะ ❤️</p>
+        </div>
+    </div>
+
+    <script>
+        const CORRECT_PASS = ["171048","17/10/48","วันเกิด"];
+        const FULL_MESSAGE = "ขอบคุณนะที่อยู่ข้างๆ กันเสมอ ไม่ว่าจะเคยทำให้ผิดหวัง เพื่อนก็ไม่ทิ้งกัน อยู่ด้วยกันมาแล้ว 5 ปี ไปมั่วที่ต่างประเทศก็ทำมาแล้ว เป็นมิตรภาพที่ดีต่อกัน คอยซัพพอร์ตกันแบบนี้ไปอีกนานๆนะ 🥰✨";
+
+        const GALAXY_PHOTOS = [
+            "https://i.ibb.co/LzrdYnRY/IMG-20260731-142646.jpg",
+            "https://i.ibb.co/81rQZrH/IMG-20260802-164559.jpg",
+            "https://i.ibb.co/8L2wK5Zt/IMG-20260802-164642.jpg",
+            "https://i.ibb.co/m5xqGDQk/IMG-20260802-164505.jpg",
+            "https://i.ibb.co/h1FzwDZW/IMG-20260802-164428.jpg",
+            "https://i.ibb.co/1t7VDrFQ/IMG-20260802-164257.jpg",
+            "https://i.ibb.co/hFZWwRJR/IMG-20260802-164036.jpg",
+            "https://i.ibb.co/4RzHjLtW/IMG-20260802-163106.jpg",
+            "https://i.ibb.co/VYbMg0th/IMG-20251023-201132.jpg",
+            "https://i.ibb.co/mVtCB9cC/IMG-20250525-132335.jpg",
+            "https://i.ibb.co/nNmz0JFh/IMG-20260802-170107.jpg",
+            "https://i.ibb.co/ZzJTTVy5/IMG-20260802-165927.jpg",
+            "https://i.ibb.co/qFcK7ty1/IMG-20260802-165850.jpg",
+            "https://i.ibb.co/SDjBKCvn/IMG-20260802-165815.jpg",
+            "https://i.ibb.co/hRPyfbYG/IMG-20260802-165721.jpg",
+            "https://i.ibb.co/3yKm29v7/IMG-20260802-165132.jpg",
+            "https://i.ibb.co/JjrzDjSW/IMG-20260802-165019.jpg",
+          "https://lh3.googleusercontent.com/d/1T6LT57rd9cR5jV-v0C4TuozG104V_2oC"
+        ];
+
+        // สุ่มรูปสำหรับใช้เล่นจิ๊กซอว์และแสดงหน้าการ์ดหลัก
+        let activePuzzleImage = GALAXY_PHOTOS[Math.floor(Math.random() * GALAXY_PHOTOS.length)];
+
+        function checkPassword() {
+            const input = document.getElementById("passcode").value.trim().toLowerCase();
+            if (CORRECT_PASS.includes(input)) {
+                document.getElementById("page-lock").classList.add("hidden");
+                document.getElementById("page-puzzle").classList.remove("hidden");
+                initPuzzle();
+            } else {
+                alert("รหัสผ่านไม่ถูกต้อง ลองใหม่อีกทีนะคนดี! 💔");
+            }
+        }
+
+        /* --- Puzzle Engine --- */
+        let tiles = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+        let draggedIndex = null;
+
+        function initPuzzle() {
+            do {
+                tiles.sort(() => Math.random() - 0.5);
+            } while (isSolved());
+
+            renderPuzzle();
+        }
+
+        function renderPuzzle() {
+            const grid = document.getElementById("puzzle-grid");
+            grid.innerHTML = "";
+
+            tiles.forEach((tilePos, index) => {
+                const tile = document.createElement("div");
+                tile.className = "puzzle-tile";
+                tile.draggable = true;
+                tile.dataset.index = index;
+
+                const xPercent = (tilePos % 3) * 50;
+                const yPercent = Math.floor(tilePos / 3) * 50;
+                
+                tile.style.backgroundImage = `url('${activePuzzleImage}')`;
+                tile.style.backgroundPosition = `${xPercent}% ${yPercent}%`;
+
+                tile.addEventListener("dragstart", () => {
+                    draggedIndex = index;
+                    tile.classList.add("dragging");
+                });
+
+                tile.addEventListener("dragend", () => tile.classList.remove("dragging"));
+
+                tile.addEventListener("dragover", (e) => {
+                    e.preventDefault();
+                    tile.classList.add("drag-over");
+                });
+
+                tile.addEventListener("dragleave", () => tile.classList.remove("drag-over"));
+
+                tile.addEventListener("drop", (e) => {
+                    e.preventDefault();
+                    tile.classList.remove("drag-over");
+                    if (draggedIndex !== null && draggedIndex !== index) {
+                        swapTiles(draggedIndex, index);
+                    }
+                });
+
+                tile.addEventListener("touchstart", () => {
+                    draggedIndex = index;
+                    tile.classList.add("dragging");
+                }, { passive: true });
+
+                tile.addEventListener("touchend", (e) => {
+                    tile.classList.remove("dragging");
+                    const touch = e.changedTouches[0];
+                    const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
+                    
+                    if (targetEl && targetEl.classList.contains("puzzle-tile")) {
+                        const targetIndex = parseInt(targetEl.dataset.index);
+                        if (draggedIndex !== null && draggedIndex !== targetIndex) {
+                            swapTiles(draggedIndex, targetIndex);
+                        }
+                    }
+                    draggedIndex = null;
+                });
+
+                grid.appendChild(tile);
+            });
+        }
+
+        function swapTiles(fromIndex, toIndex) {
+            let temp = tiles[fromIndex];
+            tiles[fromIndex] = tiles[toIndex];
+            tiles[toIndex] = temp;
+
+            renderPuzzle();
+
+            if (isSolved()) {
+                setTimeout(() => {
+                    alert("เย้! ต่อรูปสำเร็จแล้ว 🎉");
+                    document.getElementById("page-puzzle").classList.add("hidden");
+                    document.getElementById("page-card").classList.remove("hidden");
+                    document.getElementById("card-main-img").src = activePuzzleImage;
+                    startTypingMessage();
+                    setupHoldToWarp();
+                }, 300);
+            }
+        }
+
+        function isSolved() {
+            return tiles.every((val, index) => val === index);
+        }
+
+        function startTypingMessage() {
+            const el = document.getElementById("typed-text");
+            el.innerHTML = "";
+            let charIndex = 0;
+
+            const timer = setInterval(() => {
+                if (charIndex < FULL_MESSAGE.length) {
+                    el.innerHTML += FULL_MESSAGE.charAt(charIndex);
+                    charIndex++;
+                } else {
+                    clearInterval(timer);
+                }
+            }, 45);
+        }
+
+        /* --- ระบบกดค้าง จอมืดลงเรื่อยๆ --- */
+        function setupHoldToWarp() {
+            const btn = document.getElementById("btn-hold-galaxy");
+            const progressBar = document.getElementById("btn-progress");
+            const darkOverlay = document.getElementById("dark-overlay");
+
+            let holdTimer = null;
+            let progress = 0;
+            const duration = 1500;
+            const intervalTime = 20;
+
+            function startHold(e) {
+                if (e.type === 'touchstart') e.preventDefault();
+                progress = 0;
+
+                holdTimer = setInterval(() => {
+                    progress += intervalTime;
+                    let ratio = Math.min(progress / duration, 1);
+
+                    progressBar.style.width = (ratio * 100) + "%";
+                    darkOverlay.style.opacity = ratio;
+
+                    if (ratio >= 1) {
+                        clearInterval(holdTimer);
+                        holdTimer = null;
+                        setTimeout(() => {
+                            openGalaxy();
+                            setTimeout(() => {
+                                darkOverlay.style.opacity = 0;
+                                progressBar.style.width = "0%";
+                            }, 300);
+                        }, 100);
+                    }
+                }, intervalTime);
+            }
+
+            function cancelHold() {
+                if (holdTimer) {
+                    clearInterval(holdTimer);
+                    holdTimer = null;
+                    progress = 0;
+                    progressBar.style.width = "0%";
+                    darkOverlay.style.opacity = 0;
+                }
+            }
+
+            btn.addEventListener("mousedown", startHold);
+            btn.addEventListener("mouseup", cancelHold);
+            btn.addEventListener("mouseleave", cancelHold);
+
+            btn.addEventListener("touchstart", startHold, { passive: false });
+            btn.addEventListener("touchend", cancelHold);
+            btn.addEventListener("touchcancel", cancelHold);
+        }
+
+        /* --- Volumetric Smooth 3D Galaxy Engine --- */
+        let galaxyInit = false;
+        let galaxyAngleX = 0.5;
+        let galaxyAngleY = 0;
+        let userZoom = 1.0;
+
+        function openGalaxy() {
+            document.getElementById("page-galaxy").classList.add("active");
+            if (!galaxyInit) {
+                initGalaxyCanvas();
+                galaxyInit = true;
+            }
+        }
+
+        function closeGalaxy() {
+            document.getElementById("page-galaxy").classList.remove("active");
+            document.getElementById("photo-popup").classList.remove("active");
+        }
+
+        function initGalaxyCanvas() {
+            const canvas = document.getElementById("galaxy-canvas");
+            const ctx = canvas.getContext("2d");
+
+            function resize() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            resize();
+            window.addEventListener("resize", resize);
+
+            const stars = [];
+
+            for (let i = 0; i < 1800; i++) {
+                const r = Math.pow(Math.random(), 2.0) * 110;
+                const theta = Math.random() * Math.PI * 2;
+                const yDist = (Math.random() - 0.5) * (90 * Math.exp(-r / 50));
+                stars.push({
+                    x: Math.cos(theta) * r,
+                    y: yDist,
+                    z: Math.sin(theta) * r,
+                    size: Math.random() * 2.4 + 0.8,
+                    alpha: Math.random() * 0.75 + 0.25,
+                    color: `hsl(${35 + Math.random() * 25}, 85%, ${80 + Math.random() * 18}%)`,
+                    isOuter: false,
+                    twinkleSpeed: Math.random() * 0.03 + 0.01,
+                    twinkleOffset: Math.random() * Math.PI * 2
+                });
+            }
+
+            for (let i = 0; i < 2200; i++) {
+                const r = Math.pow(Math.random(), 1.1) * 280 + 10;
+                const theta = Math.random() * Math.PI * 2;
+                const h = (Math.random() - 0.5) * (70 * Math.exp(-r / 200) + 20);
+                stars.push({
+                    x: Math.cos(theta) * r,
+                    y: h,
+                    z: Math.sin(theta) * r,
+                    size: Math.random() * 1.6 + 0.4,
+                    alpha: Math.random() * 0.45 + 0.15,
+                    color: `hsl(${250 + Math.random() * 80}, 65%, 78%)`,
+                    isOuter: false,
+                    twinkleSpeed: Math.random() * 0.03 + 0.01,
+                    twinkleOffset: Math.random() * Math.PI * 2
+                });
+            }
+
+            const numArms = 4;
+            const armColors = [
+                { h: 325, s: 80, l: 78 },
+                { h: 265, s: 75, l: 80 },
+                { h: 195, s: 80, l: 78 },
+                { h: 35,  s: 85, l: 82 }
+            ];
+
+            for (let i = 0; i < 3500; i++) {
+                const arm = i % numArms;
+                const baseAngle = (arm * Math.PI * 2) / numArms;
+                const r = Math.pow(Math.random(), 1.1) * 310 + 15;
+                const angle = baseAngle + r * 0.009 + (Math.random() - 0.5) * 0.65;
+
+                const scatterR = (Math.random() - 0.5) * (45 + r * 0.28);
+                const scatterAngle = Math.random() * Math.PI * 2;
+
+                const col = armColors[arm];
+                const hue = col.h + (Math.random() * 30 - 15);
+
+                stars.push({
+                    x: Math.cos(angle) * r + Math.cos(scatterAngle) * scatterR,
+                    y: (Math.random() - 0.5) * (65 * Math.exp(-r / 180) + 20),
+                    z: Math.sin(angle) * r + Math.sin(scatterAngle) * scatterR,
+                    size: Math.random() * 1.9 + 0.5,
+                    alpha: Math.random() * 0.6 + 0.2,
+                    color: `hsl(${hue}, ${col.s}%, ${col.l}%)`,
+                    isOuter: false,
+                    twinkleSpeed: Math.random() * 0.03 + 0.01,
+                    twinkleOffset: Math.random() * Math.PI * 2
+                });
+            }
+
+            for (let i = 0; i < 6000; i++) {
+                const u = Math.random();
+                const v = Math.random();
+                const theta = u * 2.0 * Math.PI;
+                const phi = Math.acos(2.0 * v - 1.0);
+                const r = Math.pow(Math.random(), 0.55) * 1400 + 220; 
+
+                let starColor = '#ffffff';
+                const colorRand = Math.random();
+                if (colorRand < 0.04) starColor = '#ffcce6';
+                else if (colorRand < 0.07) starColor = '#cce6ff';
+                else if (colorRand < 0.10) starColor = '#fff2cc';
+
+                stars.push({
+                    x: r * Math.sin(phi) * Math.cos(theta),
+                    y: r * Math.sin(phi) * Math.sin(theta),
+                    z: r * Math.cos(phi),
+                    size: Math.random() * 1.2 + 0.4, 
+                    alpha: Math.random() * 0.9 + 0.3, 
+                    color: starColor,
+                    originalColor: starColor,
+                    isOuter: true,
+                    twinkleSpeed: Math.random() * 0.04 + 0.015,
+                    twinkleOffset: Math.random() * Math.PI * 2
+                });
+            }
+
+            const loadedPhotos = [];
+            GALAXY_PHOTOS.forEach((url, i) => {
+                const img = new Image();
+                img.crossOrigin = "Anonymous";
+                img.src = url;
+                const angle = (Math.PI * 2 / GALAXY_PHOTOS.length) * i;
+                const r = 140 + (i % 3) * 45;
+                loadedPhotos.push({
+                    img: img,
+                    url: url,
+                    x: Math.cos(angle) * r,
+                    y: (i % 2 === 0 ? 1 : -1) * (20 + (i * 6)),
+                    z: Math.sin(angle) * r,
+                    size: 65
+                });
+            });
+
+            let isDragging = false;
+            let prevX = 0;
+            let prevY = 0;
+            let initialPinchDist = null;
+            let globalTime = 0;
+
+            function render() {
+                globalTime += 1;
+                ctx.fillStyle = "#010105";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                const centerX = canvas.width / 2;
+                const centerY = canvas.height / 2 + 10;
+
+                if (!isDragging) {
+                    galaxyAngleY += 0.0025;
+                }
+
+                const cosY = Math.cos(galaxyAngleY);
+                const sinY = Math.sin(galaxyAngleY);
+                const cosX = Math.cos(galaxyAngleX);
+                const sinX = Math.sin(galaxyAngleX);
+
+                const renderList = [];
+                const colorMixFactor = Math.min(1.0, Math.max(0.0, (userZoom - 0.6) / 0.8));
+
+                stars.forEach(s => {
+                    const twinkle = Math.sin(globalTime * s.twinkleSpeed + s.twinkleOffset);
+                    let computedAlpha = s.isOuter 
+                        ? Math.min(1.0, (s.alpha + twinkle * 0.25) * Math.max(0.35, 1.4 - userZoom))
+                        : Math.min(1.0, s.alpha + twinkle * 0.15);
+
+                    if (computedAlpha < 0.02) return;
+
+                    let rx = s.x * cosY - s.z * sinY;
+                    let rz = s.x * sinY + s.z * cosY;
+                    let ry = s.y * cosX - rz * sinX;
+                    rz = s.y * sinX + rz * cosX;
+
+                    // ปรับสเกลย่อขนาดกาแล็กซี่ทั้งหมดลงเมื่อซูมออกมากๆ (userZoom น้อยกว่า 1.0)
+                    let effectiveZoom = userZoom < 1.0 ? Math.pow(userZoom, 1.3) : userZoom;
+
+                    const perspective = 650 / (650 + rz * effectiveZoom);
+                    const projX = centerX + (rx * effectiveZoom + (centerX - centerX) * (1 - effectiveZoom)) * perspective;
+                    const projY = centerY + (ry * effectiveZoom + (centerY - centerY) * (1 - effectiveZoom)) * perspective;
+
+                    let computedSize = s.isOuter 
+                        ? s.size * Math.max(0.8, Math.sqrt(effectiveZoom)) * (1 + twinkle * 0.2)
+                        : s.size * perspective * Math.sqrt(effectiveZoom) * (1 + twinkle * 0.15);
+
+                    let activeColor = s.color;
+                    if (s.isOuter && colorMixFactor <= 0.05) {
+                        activeColor = '#ffffff';
+                    }
+
+                    renderList.push({
+                        type: 'star',
+                        x: projX,
+                        y: projY,
+                        rz: rz,
+                        size: computedSize,
+                        alpha: Math.max(0.05, computedAlpha),
+                        color: activeColor
+                    });
+                });
+
+                loadedPhotos.forEach(p => {
+                    let rx = p.x * cosY - p.z * sinY;
+                    let rz = p.x * sinY + p.z * cosY;
+                    let ry = p.y * cosX - rz * sinX;
+                    rz = p.y * sinX + rz * cosX;
+
+                    let effectiveZoom = userZoom < 1.0 ? Math.pow(userZoom, 1.3) : userZoom;
+
+                    const perspective = 650 / (650 + rz * effectiveZoom);
+                    const projX = centerX + rx * effectiveZoom * perspective;
+                    const projY = centerY + ry * effectiveZoom * perspective;
+
+                    renderList.push({
+                        type: 'photo',
+                        x: projX,
+                        y: projY,
+                        rz: rz,
+                        scale: perspective * effectiveZoom,
+                        alpha: 1.0,
+                        photo: p
+                    });
+                });
+
+                renderList.sort((a, b) => b.rz - a.rz);
+
+                renderList.forEach(item => {
+                    if (item.type === 'star') {
+                        ctx.beginPath();
+                        ctx.fillStyle = item.color;
+                        ctx.globalAlpha = item.alpha;
+                        ctx.arc(item.x, item.y, Math.max(0.3, item.size), 0, Math.PI * 2);
+                        ctx.fill();
+                    } else if (item.type === 'photo') {
+                        const p = item.photo;
+                        const s = item.scale;
+
+                        p.currentX = item.x;
+                        p.currentY = item.y;
+                        p.currentScale = s;
+                        p.currentRz = item.rz;
+
+                        ctx.save();
+                        ctx.translate(item.x, item.y);
+                        ctx.scale(s, s);
+                        ctx.globalAlpha = item.alpha;
+
+                        ctx.shadowColor = "rgba(255, 182, 193, 0.8)";
+                        ctx.shadowBlur = 15;
+                        ctx.strokeStyle = "rgba(255, 255, 255, 0.95)";
+                        ctx.lineWidth = 2.5;
+
+                        ctx.beginPath();
+                        ctx.roundRect(-p.size/2 - 2, -p.size/2 - 2, p.size + 4, p.size + 4, 6);
+                        ctx.fillStyle = "#ffffff";
+                        ctx.fill();
+                        ctx.stroke();
+
+                        ctx.shadowBlur = 0;
+                        if (p.img.complete) {
+                            ctx.drawImage(p.img, -p.size/2, -p.size/2, p.size, p.size);
+                        }
+                        ctx.restore();
+                    }
+                });
+
+                ctx.globalAlpha = 1.0;
+                requestAnimationFrame(render);
+            }
+
+            render();
+
+            /* --- Interactive Controls --- */
+            canvas.addEventListener("wheel", (e) => {
+                e.preventDefault();
+                if (e.deltaY < 0) {
+                    userZoom = Math.min(userZoom * 1.08, 3.5);
+                } else {
+                    userZoom = Math.max(userZoom * 0.92, 0.05);
+                }
+            }, { passive: false });
+
+            const handleStart = (x, y) => {
+                isDragging = true;
+                prevX = x;
+                prevY = y;
+            };
+
+            const handleMove = (x, y) => {
+                if (!isDragging) return;
+                const dx = x - prevX;
+                const dy = y - prevY;
+
+                galaxyAngleY += dx * 0.005;
+                galaxyAngleX += dy * 0.003;
+                galaxyAngleX = Math.max(0.05, Math.min(1.4, galaxyAngleX));
+
+                prevX = x;
+                prevY = y;
+            };
+
+            canvas.addEventListener("touchstart", (e) => {
+                if (e.touches.length === 1) {
+                    handleStart(e.touches[0].clientX, e.touches[0].clientY);
+                } else if (e.touches.length === 2) {
+                    initialPinchDist = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                }
+            }, { passive: true });
+
+            window.addEventListener("touchmove", (e) => {
+                if (e.touches.length === 1) {
+                    handleMove(e.touches[0].clientX, e.touches[0].clientY);
+                } else if (e.touches.length === 2 && initialPinchDist) {
+                    const currentDist = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                    const diff = currentDist / initialPinchDist;
+                    userZoom = Math.max(0.05, Math.min(3.5, userZoom * diff));
+                    initialPinchDist = currentDist;
+                }
+            }, { passive: true });
+
+            window.addEventListener("touchend", () => {
+                isDragging = false;
+                initialPinchDist = null;
+            });
+
+            const handleCanvasClick = (clientX, clientY) => {
+                const rect = canvas.getBoundingClientRect();
+                const clickX = clientX - rect.left;
+                const clickY = clientY - rect.top;
+
+                let clickedPhoto = null;
+                let minDistance = Infinity;
+
+                loadedPhotos.forEach(p => {
+                    if (p.currentX !== undefined && p.currentY !== undefined && p.currentScale !== undefined) {
+                        const scaledSize = (p.size * p.currentScale);
+                        const hitRadius = Math.max(scaledSize * 0.85, 55); 
+                        
+                        const dist = Math.hypot(clickX - p.currentX, clickY - p.currentY);
+                        if (dist <= hitRadius && dist < minDistance) {
+                            minDistance = dist;
+                            clickedPhoto = p;
+                        }
+                    }
+                });
+
+                const popup = document.getElementById("photo-popup");
+                if (clickedPhoto) {
+                    document.getElementById("popup-img").src = clickedPhoto.url;
+                    popup.classList.add("active");
+                } else {
+                    popup.classList.remove("active");
+                }
+            };
+
+            canvas.addEventListener("click", (e) => {
+                handleCanvasClick(e.clientX, e.clientY);
+            });
+
+            canvas.addEventListener("touchend", (e) => {
+                if (e.changedTouches.length === 1) {
+                    const touch = e.changedTouches[0];
+                    handleCanvasClick(touch.clientX, touch.clientY);
+                }
+            });
+        }
+    </script>
 </body>
 </html>
