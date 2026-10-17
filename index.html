@@ -81,7 +81,7 @@
         }
         .hint { font-size: 13px; color: #666; margin-top: 10px; line-height: 1.5; }
         .hint-img {
-            max-width: 180px;
+            max-width: 200px;
             width: 100%;
             border-radius: 8px;
             margin: 8px auto;
@@ -179,8 +179,7 @@
             <button class="btn-pink" onclick="checkPassword()">ปลดล็อก</button>
             <div class="hint">
                 คำใบ้:<br>
-                <!-- แทนที่ลิงก์ด้านล่างด้วยลิงก์รูปภาพสูตรซิกม่าของคุณ (เช่น อัปโหลดขึ้น ImBB แล้วเอาลิงก์ Direct Link มาใส่) -->
-                <img src="https://i.ibb.co/your-formula-image.jpg" alt="Hint Formula" class="hint-img" id="custom-hint-img">
+                <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='90' viewBox='0 0 220 90' style='background:%23010105; border-radius:8px;'><text x='35' y='30' fill='%23ffffff' font-family='serif' font-size='22' text-anchor='middle'>11</text><text x='35' y='65' fill='%23ffffff' font-family='serif' font-size='42' text-anchor='middle'>∑</text><text x='35' y='82' fill='%23ffffff' font-family='serif' font-size='14' text-anchor='middle'>i=1</text><text x='95' y='60' fill='%23ffffff' font-family='serif' font-style='italic' font-size='28'>x</text><text x='110' y='66' fill='%23ffffff' font-family='serif' font-size='18'>i</text><text x='135' y='60' fill='%23ffffff' font-family='serif' font-size='28'>=</text><text x='165' y='60' fill='%23ffffff' font-family='serif' font-size='28'>?</text></svg>" alt="Hint Formula" class="hint-img">
                 (你的电话号码。)
             </div>
         </div>
@@ -249,7 +248,6 @@
             "https://lh3.googleusercontent.com/d/1sGMZI253c5_LpxUApS1P6dOlfYBJ7kQ2"
         ];
 
-        // สุ่มรูปสำหรับใช้เล่นจิ๊กซอว์และแสดงหน้าการ์ดหลัก
         let activePuzzleImage = GALAXY_PHOTOS[Math.floor(Math.random() * GALAXY_PHOTOS.length)];
 
         function checkPassword() {
@@ -263,7 +261,6 @@
             }
         }
 
-        /* --- Puzzle Engine --- */
         let tiles = [0, 1, 2, 3, 4, 5, 6, 7, 8];
         let draggedIndex = null;
 
@@ -271,7 +268,6 @@
             do {
                 tiles.sort(() => Math.random() - 0.5);
             } while (isSolved());
-
             renderPuzzle();
         }
 
@@ -374,7 +370,6 @@
             }, 45);
         }
 
-        /* --- ระบบกดค้าง จอมืดลงเรื่อยๆ --- */
         function setupHoldToWarp() {
             const btn = document.getElementById("btn-hold-galaxy");
             const progressBar = document.getElementById("btn-progress");
@@ -429,7 +424,6 @@
             btn.addEventListener("touchcancel", cancelHold);
         }
 
-        /* --- Volumetric Smooth 3D Galaxy Engine --- */
         let galaxyInit = false;
         let galaxyAngleX = 0.5;
         let galaxyAngleY = 0;
@@ -708,7 +702,6 @@
 
             render();
 
-            /* --- Interactive Controls --- */
             canvas.addEventListener("wheel", (e) => {
                 e.preventDefault();
                 if (e.deltaY < 0) {
